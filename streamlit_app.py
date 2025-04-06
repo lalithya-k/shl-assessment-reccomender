@@ -1,33 +1,33 @@
 
 import streamlit as st
 import pandas as pd
-from sentence_transformers import SentenceTransformer
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-import numpy as np
 
 st.set_page_config(page_title="SHL Assessment Recommender", layout="wide")
-st.title("🔍 SHL Assessment Recommender")
-
-@st.cache_resource
-def load_model():
-    return SentenceTransformer("paraphrase-MiniLM-L6-v2")
+st.title("🔍 SHL Assessment Recommender (TF-IDF Version)")
 
 @st.cache_data
 def load_data():
     df = pd.read_csv("shl_assessments.csv")
-    model = load_model()
-    df["embedding"] = df["Description"].apply(lambda x: model.encode(x, convert_to_numpy=True))
     return df
 
+@st.cache_resource
+def get_vectorizer_and_matrix(docs):
+    vectorizer = TfidfVectorizer()
+    matrix = vectorizer.fit_transform(docs)
+    return vectorizer, matrix
+
 df = load_data()
-model = load_model()
+vectorizer, matrix = get_vectorizer_and_matrix(df["Description"])
 
 query = st.text_area("Enter a job description or query:", height=150)
 
 if st.button("🔎 Recommend"):
     if query.strip():
-        query_embedding = model.encode(query, convert_to_numpy=True)
-        df["score"] = df["embedding"].apply(lambda emb: cosine_similarity([query_embedding], [emb])[0][0])
+        query_vec = vectorizer.transform([query])
+        similarities = cosine_similarity(query_vec, matrix).flatten()
+        df["score"] = similarities
         top_matches = df.sort_values(by="score", ascending=False).head(10)
         
         st.markdown("### 📝 Recommended Assessments:")
