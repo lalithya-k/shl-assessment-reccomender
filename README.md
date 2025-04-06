@@ -1,4 +1,3 @@
-# shl-assessment-reccomender
 # SHL Assessment Recommender System
 
 This project is a take-home assignment for SHL's Generative AI Internship. It is a lightweight, scalable Streamlit-based recommender system that helps match SHL assessments to job descriptions or hiring queries.
