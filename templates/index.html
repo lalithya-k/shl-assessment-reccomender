@@ -20,7 +20,7 @@
     <label for="query">Enter a job description or skills you’re looking for:</label><br>
     <textarea name="query" required>{{ query if query else '' }}</textarea><br><br>
     <label for="top_k">Number of recommendations:</label>
-    <input type="number" name="top_k" min="1" max="10" value="3">
+    <input type="number" name="top_k" min="1" max="5" value="3">
     <button type="submit">🔍 Recommend</button>
   </form>
 
