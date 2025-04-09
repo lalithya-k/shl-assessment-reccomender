@@ -1,34 +1,29 @@
-
-from fastapi import FastAPI
-from pydantic import BaseModel
+from fastapi import FastAPI, Request, Form
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 app = FastAPI()
 
-# Load the dataset
-df = pd.read_csv("shl_assessments.csv")
+templates = Jinja2Templates(directory="templates")
 
-# Create TF-IDF matrix
+# Load and prepare data
+df = pd.read_csv("shl_assessments.csv")
 vectorizer = TfidfVectorizer()
 tfidf_matrix = vectorizer.fit_transform(df["Description"])
 
-class RecommendRequest(BaseModel):
-    query: str
-    top_k: int = 5
+@app.get("/", response_class=HTMLResponse)
+def read_form(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request, "results": None})
 
-@app.post("/recommend")
-def recommend(req: RecommendRequest):
-    query_vec = vectorizer.transform([req.query])
+@app.post("/recommend", response_class=HTMLResponse)
+def recommend(request: Request, query: str = Form(...), top_k: int = Form(...)):
+    query_vec = vectorizer.transform([query])
     similarities = cosine_similarity(query_vec, tfidf_matrix).flatten()
-
     df["score"] = similarities
-    top_matches = df.sort_values(by="score", ascending=False).head(req.top_k)
-
-    results = top_matches[[
-        "Assessment Name", "URL", "Remote Testing Support",
-        "Adaptive/IRT Support", "Duration", "Test Type", "score"
-    ]].to_dict(orient="records")
-
-    return results
+    top_matches = df.sort_values(by="score", ascending=False).head(top_k)
+    results = top_matches[["Assessment Name", "URL", "Duration", "Test Type", "score"]].to_dict(orient="records")
+    return templates.TemplateResponse("index.html", {"request": request, "results": results, "query": query})
