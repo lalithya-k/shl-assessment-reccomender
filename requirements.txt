@@ -1,4 +1,4 @@
-streamlit
-sentence-transformers
+fastapi
+uvicorn
 pandas
 scikit-learn
