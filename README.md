@@ -1,60 +1,79 @@
-# SHL Assessment Recommender System
+# SHL Assessment Recommender
 
-This project is a take-home assignment for SHL's Generative AI Internship. It is a lightweight, scalable Streamlit-based recommender system that helps match SHL assessments to job descriptions or hiring queries.
+This project is a smart recommendation system that suggests SHL assessments based on a job description or user query using Natural Language Processing (NLP) techniques.
+
+It includes:
+- A **Flask backend** serving an assessment recommendation API.
+- A lightweight **HTML UI** (served from Flask) for interacting with the recommender.
+- A dataset of SHL assessments with metadata used for similarity matching.
 
 ---
 
 ## Live Demo
 
-🔗 [Try the app](https://shl-assessment-reccomender-uvjfghdocyyyawawq3zp8k.streamlit.app/)
+🌐 [Streamlit UI Version](https://shl-assessment-reccomender-uvjfghdocyyyawawq3zp8k.streamlit.app/)  
+⚙️ [Flask API Hosted on Render](https://shl-assessment-reccomender.onrender.com)
 
 ---
 
-##  Features
+## How it Works
 
-- Accepts free-text queries or job descriptions
-- Recommends the top-k SHL assessments based on semantic similarity
-- Displays metadata like:
-  - Remote Testing Support
-  - Adaptive/IRT Support
-  - Duration and Test Type
-- Fully responsive UI built with Streamlit
+1. A user enters a job description or desired skills.
+2. The query is transformed using **TF-IDF Vectorization**.
+3. Cosine similarity is computed between the query and assessment descriptions.
+4. The top-k most relevant SHL assessments are returned.
 
 ---
 
-## How It Works
+## Tech Stack
 
-- Uses **TF-IDF Vectorizer** to embed assessment descriptions
-- Computes **cosine similarity** between user query and dataset
-- Returns top 5–10 relevant matches in a clean table
-
----
-
-## Files
-
-| File | Description |
-|------|-------------|
-| `streamlit_app.py` | Main Streamlit app |
-| `shl_assessments.csv` | Pre-scraped dataset of SHL assessments |
-| `requirements.txt` | Python dependencies for deployment |
-| `Lalithya_SHL_Assessment_Recommender.pdf` | 1-page summary PDF submitted to SHL |
-
----
-
-## Libraries Used
-
-- `streamlit`
-- `pandas`
-- `scikit-learn`
+- **Python 3.10+**
+- **Flask** – backend server and UI templating
+- **Pandas, Scikit-learn** – data handling and NLP
+- **Jinja2** – HTML templating for UI
+- **gunicorn** – production WSGI server (for deployment)
 
 ---
 
 
-## Notes
+## Installation (Run Locally)
 
-- The original implementation used `sentence-transformers`, but was adapted to `TF-IDF` for Streamlit Cloud compatibility.
-- No external API calls or downloads are required — works offline.
+```bash
+git clone https://github.com/lalithya-k/shl-assessment-reccomender.git
+cd shl-assessment-reccomender
+pip install -r requirements.txt
+python main.py
+```
+
+Then go to `http://localhost:5000` to use the app.
 
 ---
 
+## API Usage
+
+**POST** `/recommend`  
+**Body:**
+```json
+{
+  "query": "python data analyst",
+  "top_k": 3
+}
+```
+
+**Response:**
+Returns top matching SHL assessments with name, URL, and match score.
+
+---
+
+##  Report & Submission Links
+
+-  **GitHub Repo:** [https://github.com/lalithya-k/shl-assessment-reccomender](https://github.com/lalithya-k/shl-assessment-reccomender)
+-  **1-page Report (PDF):** _[https://drive.google.com/file/d/1vwjHg0heplvdoB7ostftEUS48mkHRumC/view?usp=sharing]
+-  **API Endpoint:** [https://shl-assessment-reccomender.onrender.com/recommend](https://shl-assessment-reccomender.onrender.com/recommend)
+
+---
+
+##  License
+
+This project is built for SHL assignment evaluation purposes and may include publicly available assessment descriptions only for academic/research demonstration.
 
