@@ -1,29 +1,37 @@
-from fastapi import FastAPI, Request, Form
-from fastapi.responses import HTMLResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
+from flask import Flask, request, render_template, jsonify
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-app = FastAPI()
+app = Flask(__name__)
 
-templates = Jinja2Templates(directory="templates")
-
-# Load and prepare data
+# Load data
 df = pd.read_csv("shl_assessments.csv")
 vectorizer = TfidfVectorizer()
 tfidf_matrix = vectorizer.fit_transform(df["Description"])
 
-@app.get("/", response_class=HTMLResponse)
-def read_form(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request, "results": None})
+@app.route("/")
+def home():
+    return render_template("index.html")
 
-@app.post("/recommend", response_class=HTMLResponse)
-def recommend(request: Request, query: str = Form(...), top_k: int = Form(...)):
+@app.route("/recommend", methods=["POST"])
+def recommend():
+    data = request.get_json()
+    query = data.get("query", "")
+    top_k = int(data.get("top_k", 5))
+    
     query_vec = vectorizer.transform([query])
     similarities = cosine_similarity(query_vec, tfidf_matrix).flatten()
+
     df["score"] = similarities
     top_matches = df.sort_values(by="score", ascending=False).head(top_k)
-    results = top_matches[["Assessment Name", "URL", "Duration", "Test Type", "score"]].to_dict(orient="records")
-    return templates.TemplateResponse("index.html", {"request": request, "results": results, "query": query})
+
+    results = top_matches[[
+        "Assessment Name", "URL", "Remote Testing Support",
+        "Adaptive/IRT Support", "Duration", "Test Type", "score"
+    ]].to_dict(orient="records")
+
+    return jsonify(results)
+
+if __name__ == "__main__":
+    app.run(debug=True)
