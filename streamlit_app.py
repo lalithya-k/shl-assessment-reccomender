@@ -9,7 +9,7 @@ st.title("🔍 SHL Assessment Recommender\n(API UI)")
 
 # Input fields
 query = st.text_area("Enter a job description or skills you’re looking for:")
-top_k = st.slider("Number of recommendations", 1, 10, 3)
+top_k = st.slider("Number of recommendations", 1, 5, 3)
 
 # Call the API
 if st.button("🔍 Recommend") and query:
